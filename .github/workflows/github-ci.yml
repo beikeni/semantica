@@ -31,7 +31,7 @@ jobs:
           host: ${{ secrets.SSH_HOST_TEST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: "22"
+          port: 22
           script: |
             mkdir -p ${{ secrets.FTP_SERVER_DIR_TEST }}
 
@@ -44,12 +44,12 @@ jobs:
           port: ${{ secrets.FTP_PORT }}
           local-dir: ./dist/
           server-dir: ${{ secrets.FTP_SERVER_DIR_TEST }}
-
       - name: Restart service via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST_TEST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
           script: |
             sudo systemctl restart ${{ secrets.SERVICE_NAME }}
