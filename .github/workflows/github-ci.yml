@@ -25,6 +25,15 @@ jobs:
       - name: Build project
         run: bun run build
 
+      - name: Ensure target directory exists
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST_TEST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            mkdir -p ${{ secrets.FTP_SERVER_DIR_TEST }}
+
       - name: Deploy to VPS via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -34,7 +43,7 @@ jobs:
           port: ${{ secrets.FTP_PORT }}
           local-dir: ./dist/
           server-dir: ${{ secrets.FTP_SERVER_DIR_TEST }}
-  
+
       - name: Restart service via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
