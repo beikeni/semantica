@@ -33,7 +33,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: ${{ secrets.FTP_SERVER_DIR_TEST }}
-
+  
       - name: Restart service via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
