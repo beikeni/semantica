@@ -61,6 +61,10 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
+            # Load bun into PATH (SSH sessions don't source shell profiles)
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+
             cd ${{ secrets.SSH_SERVER_DIR_TEST }}
-            ~/.bun/bin/bun install --production
+            bun install --production
             pm2 restart ${{ secrets.PM2_APP_NAME }} || pm2 start src/index.ts --name ${{ secrets.PM2_APP_NAME }} --interpreter ~/.bun/bin/bun
