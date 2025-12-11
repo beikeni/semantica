@@ -26,6 +26,7 @@ export function App() {
           <CardDescription>
             Edit <code className="rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono">src/App.tsx</code> and save to
             test HMR
+            Alessandro
           </CardDescription>
         </CardHeader>
         <CardContent>
