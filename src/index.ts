@@ -1,13 +1,33 @@
-import { serve } from "bun";
-import index from "./index.html";
+import { serve, file } from "bun";
+import { join } from "path";
+
+const isProd = process.env.NODE_ENV === "production";
+const DIST_DIR = join(import.meta.dir, "..", "dist");
+
+// In development, use Bun's HTML import for HMR
+const devIndex = isProd ? null : await import("./index.html");
+
+async function serveStatic(pathname: string): Promise<Response | null> {
+  let filePath = join(DIST_DIR, pathname);
+  let staticFile = file(filePath);
+
+  if (await staticFile.exists()) {
+    return new Response(staticFile);
+  }
+
+  // SPA fallback
+  const indexFile = file(join(DIST_DIR, "index.html"));
+  if (await indexFile.exists()) {
+    return new Response(indexFile);
+  }
+
+  return null;
+}
 
 const server = serve({
   hostname: "0.0.0.0",
   port: 3000,
   routes: {
-    // Serve index.html for all unmatched routes.
-    "/*": index,
-
     "/api/hello": {
       async GET(req) {
         return Response.json({
@@ -29,13 +49,19 @@ const server = serve({
         message: `Hello, ${name}!`,
       });
     },
+
+    // Serve static files / SPA
+    "/*": isProd
+      ? async (req) => {
+          const url = new URL(req.url);
+          const response = await serveStatic(url.pathname);
+          return response || new Response("Not Found", { status: 404 });
+        }
+      : devIndex!.default,
   },
 
-  development: process.env.NODE_ENV !== "production" && {
-    // Enable browser hot reloading in development
+  development: !isProd && {
     hmr: true,
-
-    // Echo console logs from the browser to the server
     console: true,
   },
 });

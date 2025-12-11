@@ -25,6 +25,13 @@ jobs:
       - name: Build project
         run: bun run build
 
+      - name: Prepare deploy package
+        run: |
+          mkdir -p deploy
+          cp -r dist deploy/
+          cp -r src deploy/
+          cp package.json bun.lock deploy/
+
       - name: Ensure target directory exists
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -42,10 +49,11 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }} 
-          local-dir: ./dist/
+          port: ${{ secrets.FTP_PORT }}
+          local-dir: ./deploy/
           server-dir: ${{ secrets.FTP_SERVER_DIR_TEST }}
-      - name: Restart service via SSH
+
+      - name: Install dependencies and restart service via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST_TEST }}
@@ -53,4 +61,6 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            sudo systemctl restart ${{ secrets.SERVICE_NAME }}
+            cd ${{ secrets.SSH_SERVER_DIR_TEST }}
+            ~/.bun/bin/bun install --production
+            pm2 restart ${{ secrets.PM2_APP_NAME }} || pm2 start src/index.ts --name ${{ secrets.PM2_APP_NAME }} --interpreter ~/.bun/bin/bun
