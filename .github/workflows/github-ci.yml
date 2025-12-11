@@ -57,7 +57,7 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST_TEST }}
-          key: ${{ secrets.SSH_SECRET_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             cd ${{ secrets.SSH_SERVER_DIR_TEST }}
