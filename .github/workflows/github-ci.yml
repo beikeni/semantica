@@ -61,6 +61,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            export BUN_PATH="/root/.bun/bin/bun"
             cd ${{ secrets.SSH_SERVER_DIR_TEST }}
-            ~/.bun/bin/bun install --production
-            pm2 restart ${{ secrets.PM2_APP_NAME }} || pm2 start src/index.ts --name ${{ secrets.PM2_APP_NAME }} --interpreter ~/.bun/bin/bun
+            $BUN_PATH install --production
+            if pm2 describe "${{ secrets.PM2_APP_NAME }}" > /dev/null 2>&1; then
+              pm2 restart "${{ secrets.PM2_APP_NAME }}"
+            else
+              pm2 start src/index.ts --name "${{ secrets.PM2_APP_NAME }}" --interpreter "$BUN_PATH"
+            fi
