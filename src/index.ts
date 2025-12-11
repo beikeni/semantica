@@ -2,7 +2,8 @@ import { serve, file } from "bun";
 import { join } from "path";
 
 const isProd = process.env.NODE_ENV === "production";
-const DIST_DIR = join(import.meta.dir, "..", "dist");
+const ROOT_DIR = join(import.meta.dir, "..");
+const DIST_DIR = join(ROOT_DIR, "dist");
 
 // In development, use Bun's HTML import for HMR
 const devIndex = isProd ? null : await import("./index.html");
@@ -48,6 +49,17 @@ const server = serve({
       return Response.json({
         message: `Hello, ${name}!`,
       });
+    },
+
+    // Serve AudioWorklet file (required for speech recognition)
+    "/recorder.worklet.js": async () => {
+      const workletFile = file(join(ROOT_DIR, "recorder.worklet.js"));
+      if (await workletFile.exists()) {
+        return new Response(workletFile, {
+          headers: { "Content-Type": "application/javascript" },
+        });
+      }
+      return new Response("Worklet not found", { status: 404 });
     },
 
     // Serve static files / SPA
