@@ -65,9 +65,9 @@ jobs:
             export APP_NAME="${{ secrets.PM2_APP_NAME }}"
             APP_NAME="${APP_NAME:-sta-demo-3}"
             cd ${{ secrets.SSH_SERVER_DIR_TEST }}
-            $BUN_PATH install --production
+            $BUN_PATH install
             if pm2 describe "$APP_NAME" > /dev/null 2>&1; then
-              pm2 restart "$APP_NAME"
-            else
-              pm2 start src/index.ts --name "$APP_NAME" --interpreter "$BUN_PATH"
+              pm2 delete "$APP_NAME"
             fi
+            NODE_ENV=production pm2 start src/index.ts --name "$APP_NAME" --interpreter "$BUN_PATH"
+            pm2 save
